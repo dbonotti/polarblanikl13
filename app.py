@@ -68,9 +68,14 @@ class BlanikPolar:
         Vz_net = Vz_net[valid]
         V_ground = V_ground[valid]
         
-        # Minimizamos la razón (Tasa de caída / Avance en ruta)
-        # Ignoramos donde Vz_net es negativo porque en ascendente neto la teoría óptima cambia
-        # pero matemáticamente el mínimo de la razón sigue la tangente.
+        # Si la ascendente es tan fuerte que la tasa de caída neta es <= 0 en algún punto,
+        # la teoría MacCready indica que la velocidad óptima de planeo es la de mínima caída.
+        # Además, geométricamente la tangente desde el origen no existe.
+        if np.any(Vz_net <= 0):
+            idx_opt = np.argmin(Vz_net)
+            return V_test[idx_opt], Vz_net[idx_opt]
+            
+        # Minimizamos la razón (Tasa de caída / Avance en ruta) para encontrar la tangente
         ratio = Vz_net / V_ground
         idx_opt = np.argmin(ratio)
         return V_test[idx_opt], Vz_net[idx_opt]
@@ -154,8 +159,13 @@ with tab1:
         st.metric("Vel. Mínima Caída", f"{v_min:.1f} km/h", f"{vz_min:.2f} m/s", delta_color="inverse")
         st.metric("Vel. Planeo Óptimo", f"{v_opt:.1f} km/h", f"{vz_opt:.2f} m/s", delta_color="inverse")
         
-        ld_ratio = (v_opt - v_headwind) / 3.6 / vz_opt if vz_opt > 0 else float('inf')
-        st.metric("L/D Máximo Efectivo", f"{ld_ratio:.1f}")
+        if vz_opt > 0:
+            ld_ratio = (v_opt - v_headwind) / 3.6 / vz_opt
+            ld_text = f"{ld_ratio:.1f}"
+        else:
+            ld_text = "∞ (Ascenso)"
+            
+        st.metric("L/D Máximo Efectivo", ld_text)
 
 with tab2:
     st.subheader("Visualización 3D: Tasa de Caída")
