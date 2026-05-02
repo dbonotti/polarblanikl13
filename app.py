@@ -5,8 +5,8 @@ import plotly.graph_objects as go
 # Configuración de página
 st.set_page_config(page_title="Curva Polar Blanik L-13", layout="wide")
 
-st.title("✈️ Análisis Dinámico de Curva Polar - LET L-13 Blaník")
-st.markdown("Generador interactivo basado en las especificaciones teóricas del planeador.")
+st.title("✈️ Análisis Dinámico de Curva Polar -Blanik L-13 ")
+st.markdown("Generador interactivo para clase magistral.")
 
 class BlanikPolar:
     def __init__(self):
